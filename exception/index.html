@@ -5,7 +5,7 @@
 </head>
 
 <body>
-    <pre>
+    <pre style="font-family: cursive;font-size: 16px;">
         //############################### Step1 ###############################
         <strong>发件人: </strong>wlj王伦佳 
         <strong>发送时间: </strong>2019年2月11日 13:56
@@ -14,17 +14,17 @@
         <strong>主题: </strong>答复: [问题告警]FullGC过于频繁:存在大于1s的FullGC
         <img src="../assert/JMX.png">
         从老年代一周的走势图来看，老年代的最大大小在2G左右，当达到这个阈值就会触发一次full gc。从以下cat可以验证：
-        http://cat.ctripcorp.com/cat/r/h?date=2019020608&ip=10.28.208.147&ip=10.28.208.147&domain=100014944
-        http://cat.ctripcorp.com/cat/r/h?date=2019020710&ip=10.28.208.147&ip=10.28.208.147&domain=100014944
-        http://cat.ctripcorp.com/cat/r/h?date=2019020915&ip=10.28.208.147&ip=10.28.208.147&domain=100014944
+        <a>http://cat.ctripcorp.com/cat/r/h?date=2019020608&ip=10.28.208.147&ip=10.28.208.147&domain=100014944</a>
+        <a>http://cat.ctripcorp.com/cat/r/h?date=2019020710&ip=10.28.208.147&ip=10.28.208.147&domain=100014944</a>
+        <a>http://cat.ctripcorp.com/cat/r/h?date=2019020915&ip=10.28.208.147&ip=10.28.208.147&domain=100014944</a>
         可以看的出来，每次full gc时间都是在1000ms-2000ms之间。
         以上说明本次full gc的触发是正常的并且耗费的时间属于正常的。
         Q&A：
         Q：为什么每次full gc都会需要1000ms-2000ms的时间？
-        A：参考：http://vi.fx.ctripcorp.com/10.28.208.147:8080/vi/index.html#/component/custom/vi.vmsummary/vm%20summary
+        A：参考：<a>http://vi.fx.ctripcorp.com/10.28.208.147:8080/vi/index.html#/component/custom/vi.vmsummary/vm%20summary</a>
         可以看到最大堆大小为12G，初始堆大小7G。过大的堆会造成在full gc的时候出现时间比较长的情况。
         Q：如何优化？
-        A：参考：http://conf.ctripcorp.com/pages/viewpage.action?pageId=150164373#id-2.%E7%94%A8%E6%88%B7%E6%89%8B%E5%86%8C-2.2.2FullGC%E8%80%97%E6%97%B6%E8%BF%87%E9%95%BF提供以下优化方案：
+        A：参考：<a>http://conf.ctripcorp.com/pages/viewpage.action?pageId=150164373#id-2.%E7%94%A8%E6%88%B7%E6%89%8B%E5%86%8C-2.2.2FullGC%E8%80%97%E6%97%B6%E8%BF%87%E9%95%BF提供以下优化方案</a>：
             优化方案：
         * 缩小年老代
         由于GC算法在执行Full GC的阈值设定上一般是以年老代的占用量为标准的，单次回收量过大说明在执行Full GC时年老代总的占用空间过大。所以可以考虑适当缩小年老代，提升Full GC的频率，降低单次回收的内存大小，进而缩短单次Full GC的耗时。
@@ -39,11 +39,11 @@
         以上结论是我个人分析的观点，后面还需要验证，目前正在使用heap dump进行分析，希望从代码层面找到造成年老代过大的原因再进行优化
         
         //############################### Step2 ###############################
-        发件人: wlj王伦佳 <lunjiawang@trip.com> 
-        发送时间: 2019年2月11日 16:52
-        收件人: xxx
-        抄送: xxx
-        主题: 答复: [问题告警]FullGC过于频繁:存在大于1s的FullGC
+        <strong>发件人: </strong>wlj王伦佳 
+        <strong>发送时间: </strong>2019年2月11日 16:52
+        <strong>收件人: </strong>xxx
+        <strong>抄送: </strong>xxx
+        <strong>主题: </strong>答复: [问题告警]FullGC过于频繁:存在大于1s的FullGC
         续上一个回复
         导致老年代越来越多的原因一般有两个：1.对象过大，直接从新生代进入到老年代；2.对象存活时间比较长。
         使用分析工具mat(eclipse插件，可独立使用)分析从该机器上抓取下来的heap dump，结果如下：
@@ -56,12 +56,13 @@
         <img src="../assert/leakSuspects.png">
         这张图片显示可能存在的内存泄露，从红框里面看到主要是int数组，一般来说如果是程序中的具体类，那么就需要考虑代码中是不是有内存泄露的问题。
         结论：代码正常，没有重大内存泄漏；框架和jvm运行环境有大对象导致堆内存过大，属于正常。
-         
-        发件人: wlj王伦佳 <lunjiawang@trip.com> 
-        发送时间: 2019年2月18日 14:24
-        收件人: xxx
-        抄送: xxx
-        主题: 答复: [问题告警]FullGC过于频繁:存在大于1s的FullGC
+        
+        //############################### Step3 ###############################
+        <strong>发件人: </strong>wlj王伦佳 
+        <strong>发送时间: </strong>2019年2月18日 14:24
+        <strong>收件人: </strong>xxx
+        <strong>抄送: </strong>xxx
+        <strong>主题: </strong>答复: [问题告警]FullGC过于频繁:存在大于1s的FullGC
         Dear All
         关于这个问题的分析和最终的结论
         分析：
