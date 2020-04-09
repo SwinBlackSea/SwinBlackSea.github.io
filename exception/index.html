@@ -7,11 +7,11 @@
 <body>
     <pre>
         //############################### Step1 ###############################
-        发件人: wlj王伦佳 
-        发送时间: 2019年2月11日 13:56
-        收件人: xxx
-        抄送: xxx
-        主题: 答复: [问题告警]FullGC过于频繁:存在大于1s的FullGC
+        <strong>发件人: </strong>wlj王伦佳 
+        <strong>发送时间: </strong>2019年2月11日 13:56
+        <strong>收件人: </strong>xxx
+        <strong>抄送: </strong>xxx
+        <strong>主题: </strong>答复: [问题告警]FullGC过于频繁:存在大于1s的FullGC
         <img src="../assert/JMX.png">
         从老年代一周的走势图来看，老年代的最大大小在2G左右，当达到这个阈值就会触发一次full gc。从以下cat可以验证：
         http://cat.ctripcorp.com/cat/r/h?date=2019020608&ip=10.28.208.147&ip=10.28.208.147&domain=100014944
@@ -48,11 +48,12 @@
         导致老年代越来越多的原因一般有两个：1.对象过大，直接从新生代进入到老年代；2.对象存活时间比较长。
         使用分析工具mat(eclipse插件，可独立使用)分析从该机器上抓取下来的heap dump，结果如下：
         大对象：
+        <img src="../assert/heapdump.png">
         从上面可以看到在携程框架和应用程序范围内：qmq框架的ackSendQueue类产生的大对象占用了大量的堆内存，clog框架的SizeAwareBlockingQueue类也占用了比较大的堆内存。除此之外基本都是java中的基本数据类型占用的比较多。
         从业务上也基本可以验证，因为每条message都要ack，每天都有几千条message，而ack的对象又比较大。同时具备大和多的特点从而导致老年代内存占用持续上升。
         对象存活时间比较长：
         一般进入到老年代就说明对象存活时间比较长。导致这个原因除了对象大之外还有可能就是内存泄露
-        
+        <img src="../assert/leakSuspects.png">
         这张图片显示可能存在的内存泄露，从红框里面看到主要是int数组，一般来说如果是程序中的具体类，那么就需要考虑代码中是不是有内存泄露的问题。
         结论：代码正常，没有重大内存泄漏；框架和jvm运行环境有大对象导致堆内存过大，属于正常。
          
@@ -66,12 +67,17 @@
         分析：
         1.     上周本来说是改成消息监听的模式，但是后来跟涛哥讨论了下，问题的原因并不一定是多线程ACK导致的，也是为了查清楚问题的本质，我们仍然打算使用定制化多线程主动拉的模式来做（主动拉模式更加高级，因为我们可以根据实际业务量调整每次拉取的数量从而保证性能的稳定而不是被动依赖于消息通道中的消息数量）
         2.     一开始我们认为是qmq的ack导致的，但是和qmq框架部门沟通之后发现那边并没有看出来什么问题。后来涛哥在查看job吞吐量的时候发现异常：吞吐量极高
-        以上是job上周五最后一次发布之前和之后的对比这是和4940对比，4940也才250kbps
+        <img src="../assert/outgoing_ingoing.png">
+        以上是job上周五最后一次发布之前和之后的对比这是和4940对比，
+        <img src="../assert/outgoing_ingoing2.png">
+        4940也才250kbps
+
         3.     为什么吞吐量这么高？在查看日志的时候发现有比较大的日志对象存在，从代码中发现ProductNameJob中曾经记录过ottdIrmpTranslationServiceProxy.productInfoGet返回体，记录如下：
-        
+        <img src="../assert/code_log.png">
         看日志发现这个对象日志非常大，里面记录了大量的schema结构，但是从白鳍框架生成的对象来看里面对schema接口标注了@JsonIgnore。理论上不应该会有schema结构，后来从网上查找FastJson的用法，发现FastJson中使用@JSONField来对属性进行过滤而不是@JsonIgnore
         4.接下来把所有的fastjson全部转换为gson，经过三天的测试，发现吞吐量显著下降，full gc也没有发生，另外老年代大小也显著下降并维持稳定：
-        
+        <img src="../assert/ret_jmx.png">
+        <img src="../assert/ret_fullgc.png">
         结论：FastJson和携程框架的标准不一致导致在log的时候产生大对象从而导致full gc，改成gson之后该问题从目前来看已经被解决。
                       这个问题让我们对fastjson框架有个新的认识，在以后的代码中尽量使用gson。
      </pre>
