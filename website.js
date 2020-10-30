@@ -22,3 +22,4 @@ RAP	https://foreignrap.com
 海	https://seaside-station.com/region/hokkaido/
 标准地图	http://bzdt.ch.mnr.gov.cn/index.html
 色差	http://www.cuishuai.cc/game/
+美区AppID  https://shadowsockshelp.github.io/Shadowsocks/appleid.html
